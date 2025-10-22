@@ -13,7 +13,7 @@ It demonstrates how to build a **regulatory-compliant token** that integrates **
 * **Technology Stack:** Leo Language + Aleo zkVM
 * **Author:** Ubongabasi Jerome
 * **Deployment ID:** `at1kzng7808uutuj2grczpj8ju0ahrsxrn78vp8vhdj75qeh3l0eu8s4wqy7g`
-* **Deployment URL:** [View on Aleo Testnet](https://testnet.aleo.info/program/project_zero.aleo)
+* **Deployment URL:** [View on Aleo Testnet](https://testnet.aleoscan.io/program?id=project_zero.aleo)
 * **Transaction ID:** `at1klry6c4xqkvst4tfdwwv40sp60adjqdedr5ec8cpgfx6rnxz9uzsqmz3ax`
 
 ---
