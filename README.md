@@ -1,137 +1,65 @@
-# LEO Token — Compliant Private Tokens Workshop (Uyo, Nigeria)
+# Ubongabasi Jerome Compliant Private Token (Aleo Workshop Project)
 
-## Overview
-
-**LEO Token** was developed as part of the **Compliant Private Tokens Workshop (Uyo, Nigeria)** — a hands-on training program introducing developers to **Aleo’s zero-knowledge programming model**. The project demonstrates how to design, build, and enforce compliance for a privacy-preserving fungible token on the **Aleo blockchain**.
-
-The token combines **public transparency** with **private confidentiality**, integrating an external compliance layer via the `workshop_ofac.aleo` module. Through this implementation, participants learn how to construct a real-world, regulation-aware digital asset system that balances privacy with accountability.
+The **Ubongabasi Jerome Compliant Private Token** is a privacy-preserving smart contract built on the **Aleo blockchain** as part of the **Aleo Workshop**.
+It demonstrates how to build a **regulatory-compliant token** that integrates **OFAC (Office of Foreign Assets Control)** address verification for compliant minting and transferring of tokens, both publicly and privately.
 
 ---
 
-## Purpose
+## 1. Deployment Information
 
-The **Compliant Private Tokens Workshop** was designed to teach Aleo developers in Uyo how to:
-
-* Build compliant token programs using **Leo**.
-* Understand the dual architecture of **public mappings** and **private records**.
-* Integrate **OFAC-style compliance checks** for every transaction.
-* Apply **zero-knowledge proofs** to secure and verify token operations.
-
-**LEO Token** serves as a reference project for developers to grasp both conceptual and technical aspects of tokenization under Aleo’s privacy model.
-
----
-
-## Core Principles
-
-### 1. **Public Ledger Operations**
-
-Public functions operate transparently, modifying a shared on-chain mapping of balances. Each address and its corresponding balance are visible on-chain, ensuring accountability where required.
-All public operations:
-
-* Enforce compliance before modifying state.
-* Use `Mapping::get_or_use` and `Mapping::set` to handle balances securely.
-
-**Examples:**
-
-* `mint_public`: Adds tokens to a recipient’s balance after successful compliance verification.
-* `transfer_public`: Moves tokens between visible balances, maintaining auditability.
+* **Program Name:** `project_zero.aleo`
+* **Registry Module:** `workshop_ofac.aleo` (for compliance verification)
+* **Blockchain:** Aleo Testnet
+* **Technology Stack:** Leo Language + Aleo zkVM
+* **Author:** Ubongabasi Jerome
+* **Deployment ID:** `at1kzng7808uutuj2grczpj8ju0ahrsxrn78vp8vhdj75qeh3l0eu8s4wqy7g`
+* **Deployment URL:** [View on Aleo Testnet](https://testnet.aleo.info/program/project_zero.aleo)
+* **Transaction ID:** `at1klry6c4xqkvst4tfdwwv40sp60adjqdedr5ec8cpgfx6rnxz9uzsqmz3ax`
 
 ---
 
-### 2. **Private Record Operations**
+## 2. Functional Overview
 
-Private functions use **Aleo’s record system**, allowing token transfers and ownership changes to remain confidential.
-Each token record has the structure:
+The contract demonstrates a compliant token model enforcing regulatory screening before any mint or transfer action. It defines a mapping-based ledger for public balances and record-based storage for private ownership. The OFAC module (`workshop_ofac.aleo`) ensures that no sanctioned address can participate in minting or transfer operations.
+
+**Key Operations**
+
+**Public Mint**
 
 ```leo
-record Token {
-    owner: address,
-    amount: u64
+async transition mint_public(public recipient: address, public amount: u64) -> Future {
+    let address_check: Future = workshop_ofac.aleo/address_check(recipient);
+    return mint_public_onchain(recipient, amount, address_check);
 }
 ```
 
-Records are consumed and recreated atomically, ensuring correctness without revealing participant identities or balances.
-
-**Examples:**
-
-* `mint_private`: Issues tokens as a new, encrypted record for the recipient.
-* `transfer_private`: Transfers tokens privately, producing new records for both sender and recipient.
-
----
-
-### 3. **Integrated Compliance Layer**
-
-All operations interface with:
+**Private Mint**
 
 ```leo
-workshop_ofac.aleo/address_check(address)
+async transition mint_private(private recipient: address, private amount: u64) -> (Token, Future) {
+    let address_check: Future = workshop_ofac.aleo/address_check(recipient);
+    let token: Token = Token { owner: recipient, amount: amount };
+    return (token, mint_private_onchain(address_check));
+}
 ```
 
-This ensures that every token interaction — mint or transfer — is preceded by a compliance check against restricted addresses. The process uses Aleo’s asynchronous `Future` mechanism, requiring the check to **complete before** any state or record update occurs.
+**Public Transfer**
 
-This implementation models how **regulatory compliance can be encoded directly into decentralized systems** using Aleo’s async architecture.
-
----
-
-## Functional Overview
-
-| Function           | Visibility | Description                                                                     |
-| ------------------ | ---------- | ------------------------------------------------------------------------------- |
-| `mint_public`      | Public     | Mints tokens by increasing the recipient’s balance after compliance validation. |
-| `mint_private`     | Private    | Issues a new token record privately to the recipient.                           |
-| `transfer_public`  | Public     | Transfers visible balances between two addresses.                               |
-| `transfer_private` | Private    | Privately transfers value using record consumption and regeneration.            |
-
----
-
-## Learning Objectives
-
-By completing the **LEO Token** project, workshop participants learned to:
-
-1. Define and use **mappings** and **records** in Aleo programs.
-2. Write **async functions** that coordinate external compliance checks.
-3. Manage both **public and private** state transitions securely.
-4. Implement **regulatory enforcement** using external Aleo modules.
-5. Design systems that merge **transparency and privacy** effectively.
-
----
-
-## Deployment Details
-
-* **Program Name:** `project_zero.aleo`
-* **Workshop:** Compliant Private Tokens (Uyo, Nigeria)
-* **Dependency:** `workshop_ofac.aleo`
-* **Platform:** Aleo Testnet
-* **Tools:** Leo CLI
-
-**Build and Deploy Commands:**
-
-```bash
-leo build
-leo deploy
+```leo
+async transition transfer_public(public recipient: address, public amount: u64) -> Future {
+    let address_check: Future = workshop_ofac.aleo/address_check(recipient);
+    return transfer_public_onchain(self.signer, recipient, amount, address_check);
+}
 ```
 
-**Run Examples:**
-
-```bash
-leo run mint_public recipient_address 100u64
-leo run transfer_public recipient_address 50u64
-leo run mint_private recipient_address 100u64
-leo run transfer_private sender_record recipient_address 50u64
-```
+The contract leverages asynchronous address validation (`Future` and `await()`) to ensure compliance before transaction completion.
 
 ---
 
-## Educational Value
+## 3. Author
 
-This project was the **practical component** of the Compliant Private Tokens Workshop in Uyo, aimed at bridging Aleo theory and applied zero-knowledge programming. It provided participants with hands-on experience in:
+**Ubongabasi Jerome**
+Software Engineer
+Aleo Workshop Participant
 
-* Building privacy-first smart contracts.
-* Enforcing compliance within cryptographic systems.
-* Structuring token logic for both regulated and confidential use cases.
-
----
-
-## Summary
-
-**LEO Token** embodies the central theme of the **Compliant Private Tokens Workshop (Uyo, Nigeria)** — that privacy and compliance can coexist within decentralized systems. It serves as an archetype for developing compliant, privacy-preserving token infrastructures on Aleo, illustrating how to balance **user confidentiality**, **regulatory transparency**, and **technical integrity** in one coherent zero-knowledge design.
+Developed as part of the **Aleo Workshop Compliant Token Challenge**, demonstrating secure, regulatory-compliant tokenization using **Leo** and **Aleo zk technology**.
